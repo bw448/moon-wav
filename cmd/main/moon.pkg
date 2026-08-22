@@ -1,0 +1,5 @@
+import {
+  "bw448/moon-wav" @lib,
+}
+
+pkgtype(kind: "executable")

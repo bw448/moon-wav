@@ -1,18 +1,22 @@
 # 🎵 moon-wav
 
+**MoonBit 原生 WAV 音频解码库**
+
 A native MoonBit WAV audio decoding library.
+
+一个纯 MoonBit 实现的 WAV 音频解码库，支持 PCM 解码、格式转换、音频操作等功能。
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![mooncakes.io](https://img.shields.io/badge/mooncakes.io-bw448%2Fmoon--wav-green.svg)](https://mooncakes.io/docs/bw448/moon-wav)
 
-## ✨ Features
+## ✨ Features / 功能特性
 
-- **WAV File Parsing** - Parse RIFF headers, fmt chunks, and data chunks
-- **PCM Audio Decoding** - Support for 8-bit, 16-bit, and 24-bit PCM audio
-- **Channel Support** - Mono and stereo audio
-- **Format Conversion** - Convert between bit depths and channel configurations
-- **Audio Operations** - Trim, concat, volume adjust, mix, fade in/out, reverse
-- **Statistics** - Peak amplitude and RMS level calculation
+- **WAV 文件解析** - 解析 RIFF 头部、fmt 块、data 块
+- **PCM 音频解码** - 支持 8 位、16 位、24 位 PCM 音频
+- **声道支持** - 单声道和立体声
+- **格式转换** - 位深转换、声道转换、采样率转换
+- **音频操作** - 裁剪、拼接、音量调整、混音、淡入淡出、反转
+- **统计分析** - 峰值振幅和 RMS 电平计算
 
 ## 📦 Installation
 

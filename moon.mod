@@ -15,4 +15,4 @@ keywords = [ "wav", "audio", "pcm", "decode", "RIFF" ]
 
 preferred_target = "wasm"
 
-description = "A native MoonBit WAV audio decoding library supporting PCM 8/16/24-bit, mono/stereo, format conversion and audio operations"
+description = "MoonBit 原生 WAV 音频解码库 | A native MoonBit WAV audio decoding library"

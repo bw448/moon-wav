@@ -1,104 +1,151 @@
-// Example: Decode a WAV file and display its information
+// Example: Complete WAV library demonstration
 //
 // Run with: moon run cmd/main
 
 ///|
 fn main {
-  // Create a sample WAV file for demonstration
-  let wav_data = create_sample_wav()
+  println("=== moon-wav Library Demo ===")
+  println("")
 
-  // Decode the WAV file
-  match @lib.decode(wav_data) {
-    Ok(audio) => {
-      println("=== WAV File Information ===")
-      println("Audio Format: PCM")
-      println("Channels: " + audio.info.num_channels.to_string())
-      println("Sample Rate: " + audio.info.sample_rate.to_string() + " Hz")
-      println("Bits Per Sample: " + audio.info.bits_per_sample.to_string())
-      println("Data Size: " + audio.info.data_size.to_string() + " bytes")
-      println("")
+  // 1. Generate a sine wave and encode to WAV
+  demo_generate_and_encode()
 
-      println("=== Audio Data ===")
-      println("Total Samples: " + audio.samples.length().to_string())
-      println("")
+  // 2. Decode and analyze
+  demo_decode_and_analyze()
 
-      // Display first 10 samples
-      println("First 10 samples:")
-      let mut i = 0
-      while i < 10 && i < audio.samples.length() {
-        println(
-          "  Sample " + i.to_string() + ": " + audio.samples[i].to_string(),
-        )
-        i = i + 1
-      }
-      println("")
+  // 3. Audio processing pipeline
+  demo_processing_pipeline()
 
-      // Calculate some statistics
-      let peak = @lib.get_peak_amplitude(audio.samples)
-      let rms = @lib.get_rms_level(audio.samples)
-      println("=== Statistics ===")
-      println("Peak Amplitude: " + peak.to_string())
-      println("RMS Level: " + rms.to_string())
-    }
-    Err(_) => println("Error decoding WAV file")
-  }
+  // 4. Format conversion
+  demo_format_conversion()
+
+  // 5. Validation
+  demo_validation()
 }
 
 ///|
-/// Create a sample WAV file with a simple sine wave
-fn create_sample_wav() -> Bytes {
-  let buf = Buffer(size_hint=1024)
-  let num_samples = 100
-  let sample_rate = 44100
-  let bits_per_sample = 16
+fn demo_generate_and_encode {
+  println("--- 1. Generate & Encode ---")
 
-  // RIFF header
-  buf.write_bytes(b"RIFF")
-  let data_size = num_samples * (bits_per_sample / 8)
-  let file_size = 36 + data_size
-  buf.write_int_le(file_size)
-  buf.write_bytes(b"WAVE")
+  // Generate a 440Hz sine wave (A4 note), 0.5 seconds
+  let audio = @lib.generate_sine_wav(440.0, 16000.0, 44100, 0.5, 16)
+  println("Generated " + audio.samples.length().to_string() + " samples at 440Hz")
 
-  // fmt chunk
-  buf.write_bytes(b"fmt ")
-  buf.write_int_le(16) // chunk size
-  buf.write_int16_le(Int16::from_int(1)) // PCM format
-  buf.write_int16_le(Int16::from_int(1)) // mono
-  buf.write_int_le(sample_rate)
-  let byte_rate = sample_rate * 1 * (bits_per_sample / 8)
-  buf.write_int_le(byte_rate)
-  let block_align = 1 * (bits_per_sample / 8)
-  buf.write_int16_le(Int16::from_int(block_align))
-  buf.write_int16_le(Int16::from_int(bits_per_sample))
+  // Encode to WAV format
+  let wav_bytes = @lib.encode(audio)
+  println("Encoded to WAV: " + wav_bytes.length().to_string() + " bytes")
 
-  // data chunk
-  buf.write_bytes(b"data")
-  buf.write_int_le(data_size)
-
-  // Generate a simple sine wave (440 Hz = A4 note)
-  let frequency = 440.0
-  let amplitude = 16000.0
-  let pi = 3.141592653589793
-
-  let mut i = 0
-  while i < num_samples {
-    let t = Double::from_int(i) / Double::from_int(sample_rate)
-    let angle = 2.0 * pi * frequency * t
-    // Use Taylor series approximation for sin
-    let sin_val = angle -
-      angle * angle * angle / 6.0 +
-      angle * angle * angle * angle * angle / 120.0
-    let sample = (amplitude * sin_val).to_int()
-    let clamped = if sample < -32768 {
-      -32768
-    } else if sample > 32767 {
-      32767
-    } else {
-      sample
+  // Verify by decoding
+  match @lib.decode(wav_bytes) {
+    Ok(decoded) => {
+      println("Decoded successfully: " + decoded.samples.length().to_string() + " samples")
     }
-    buf.write_int16_le(Int16::from_int(clamped))
-    i = i + 1
+    Err(_) => println("Decode failed!")
+  }
+  println("")
+}
+
+///|
+fn demo_decode_and_analyze {
+  println("--- 2. Decode & Analyze ---")
+
+  // Create a test WAV with some interesting properties
+  let samples = @lib.generate_sine(1000.0, 20000.0, 44100, 0.2)
+  let audio = @lib.generate_sine_wav(1000.0, 20000.0, 44100, 0.2, 16)
+  let wav_data = @lib.encode(audio)
+
+  match @lib.decode(wav_data) {
+    Ok(decoded) => {
+      // Format info
+      let info_str = @lib.format_wav_info(decoded.info)
+      println(info_str)
+
+      // Analysis
+      let analysis = @lib.analyze(decoded, 100)
+      println("Peak amplitude: " + analysis.peak.to_string())
+      println("RMS level: " + analysis.rms.to_string())
+      println("Zero crossings: " + analysis.zero_crossings.to_string())
+      println("Has clipping: " + analysis.has_clipping.to_string())
+      println("Silence ratio: " + (analysis.silence_ratio * 100.0).to_string() + "%")
+    }
+    Err(_) => println("Decode failed!")
+  }
+  println("")
+}
+
+///|
+fn demo_processing_pipeline {
+  println("--- 3. Processing Pipeline ---")
+
+  // Generate source audio
+  let audio = @lib.generate_sine_wav(440.0, 16000.0, 44100, 0.3, 16)
+  println("Original: " + audio.samples.length().to_string() + " samples")
+
+  // Apply effects chain
+  let processed = @lib.fade_in(audio.samples, 2205) // 50ms fade in
+  let processed = @lib.fade_out(processed, 2205) // 50ms fade out
+  let processed = @lib.adjust_volume(processed, 0.8) // 80% volume
+  println("After fade in/out + volume: " + processed.length().to_string() + " samples")
+
+  // Reverse effect
+  let reversed = @lib.reverse(processed)
+  println("After reverse: " + reversed.length().to_string() + " samples")
+
+  // Trim to first 10000 samples
+  let trimmed = @lib.trim(processed, 0, 10000)
+  println("After trim: " + trimmed.length().to_string() + " samples")
+  println("")
+}
+
+///|
+fn demo_format_conversion {
+  println("--- 4. Format Conversion ---")
+
+  // Create stereo audio
+  let left = @lib.generate_sine(440.0, 16000.0, 44100, 0.1)
+  let right = @lib.generate_sine(880.0, 16000.0, 44100, 0.1)
+  let stereo = @lib.combine_stereo(left, right)
+  println("Stereo: " + stereo.length().to_string() + " samples")
+
+  // Convert to mono
+  match @lib.convert_channels(stereo, 2, 1) {
+    Ok(mono) => println("Mono: " + mono.length().to_string() + " samples")
+    Err(_) => println("Conversion failed!")
   }
 
-  buf.to_bytes()
+  // Bit depth conversion
+  let samples_16 = [1000, -1000, 2000, -2000]
+  match @lib.convert_bit_depth(samples_16, 16, 8) {
+    Ok(samples_8) => println("16-bit to 8-bit: " + samples_8.length().to_string() + " samples")
+    Err(_) => println("Conversion failed!")
+  }
+
+  // Resample
+  let samples = @lib.generate_sine(440.0, 16000.0, 44100, 0.1)
+  let resampled = @lib.resample(samples, 44100, 22050, 1)
+  println("Resampled 44100->22050: " + resampled.length().to_string() + " samples")
+  println("")
+}
+
+///|
+fn demo_validation {
+  println("--- 5. Validation ---")
+
+  // Create a valid WAV
+  let audio = @lib.generate_sine_wav(440.0, 16000.0, 44100, 0.1, 16)
+  let wav_data = @lib.encode(audio)
+
+  let result = @lib.validate(wav_data)
+  println("Valid: " + result.is_valid.to_string())
+  println("Warnings: " + result.warnings.length().to_string())
+
+  // Validate invalid data
+  let invalid = Bytes::from_array([0, 0, 0, 0, 0, 0])
+  let result2 = @lib.validate(invalid)
+  println("Invalid data - Valid: " + result2.is_valid.to_string())
+  match result2.error {
+    Some(msg) => println("Error: " + msg)
+    None => println("No error")
+  }
+  println("")
 }

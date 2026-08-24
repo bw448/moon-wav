@@ -37,17 +37,27 @@ pub fn generate_sine(
       } else {
         (pi - reduced, 1.0)
       }
+    } else if reduced < 3.0 * pi / 2.0 {
+      (reduced - pi, -1.0)
     } else {
-      if reduced < 3.0 * pi / 2.0 {
-        (reduced - pi, -1.0)
-      } else {
-        (two_pi - reduced, -1.0)
-      }
+      (two_pi - reduced, -1.0)
     }
 
     // Taylor series for sin(x) in [0, pi/2] with 6 terms
     let x2 = x * x
-    let sin_val = x * (1.0 - x2 * (1.0 / 6.0 - x2 * (1.0 / 120.0 - x2 * (1.0 / 5040.0 - x2 * (1.0 / 362880.0 - x2 / 39916800.0)))))
+    let sin_val = x *
+      (
+        1.0 -
+        x2 *
+        (
+          1.0 / 6.0 -
+          x2 *
+          (
+            1.0 / 120.0 -
+            x2 * (1.0 / 5040.0 - x2 * (1.0 / 362880.0 - x2 / 39916800.0))
+          )
+        )
+      )
 
     let sample = (amplitude * sign * sin_val).to_int()
     samples.push(sample)
@@ -80,7 +90,7 @@ pub fn generate_square(
 
   let mut i = 0
   while i < num_samples {
-    let phase = (Double::from_int(i) % period) / period
+    let phase = Double::from_int(i) % period / period
     let sample = if phase < 0.5 { amplitude } else { -amplitude }
     samples.push(sample.to_int())
     i = i + 1
@@ -112,7 +122,7 @@ pub fn generate_sawtooth(
 
   let mut i = 0
   while i < num_samples {
-    let phase = (Double::from_int(i) % period) / period
+    let phase = Double::from_int(i) % period / period
     let sample = amplitude * (2.0 * phase - 1.0)
     samples.push(sample.to_int())
     i = i + 1
@@ -144,7 +154,7 @@ pub fn generate_triangle(
 
   let mut i = 0
   while i < num_samples {
-    let phase = (Double::from_int(i) % period) / period
+    let phase = Double::from_int(i) % period / period
     let sample = if phase < 0.5 {
       amplitude * (4.0 * phase - 1.0)
     } else {
@@ -222,17 +232,25 @@ pub fn generate_chirp(
   while i < num_samples {
     let t = Double::from_int(i) / Double::from_int(sample_rate)
     // Phase = integral of 2*pi*freq(t) dt
-    let phase = two_pi * (start_freq * t + (end_freq - start_freq) * t * t / (2.0 * t_total))
+    let phase = two_pi *
+      (start_freq * t + (end_freq - start_freq) * t * t / (2.0 * t_total))
 
     // Reduce angle to [0, 2*pi) and use symmetry
     let reduced = phase - two_pi * (phase / two_pi).floor()
     let (x, sign) = if reduced < pi {
-      if reduced < pi / 2.0 { (reduced, 1.0) } else { (pi - reduced, 1.0) }
+      if reduced < pi / 2.0 {
+        (reduced, 1.0)
+      } else {
+        (pi - reduced, 1.0)
+      }
+    } else if reduced < 3.0 * pi / 2.0 {
+      (reduced - pi, -1.0)
     } else {
-      if reduced < 3.0 * pi / 2.0 { (reduced - pi, -1.0) } else { (two_pi - reduced, -1.0) }
+      (two_pi - reduced, -1.0)
     }
     let x2 = x * x
-    let sin_val = x * (1.0 - x2 * (1.0 / 6.0 - x2 * (1.0 / 120.0 - x2 / 5040.0)))
+    let sin_val = x *
+      (1.0 - x2 * (1.0 / 6.0 - x2 * (1.0 / 120.0 - x2 / 5040.0)))
 
     let sample = (amplitude * sign * sin_val).to_int()
     samples.push(sample)
@@ -251,10 +269,7 @@ pub fn generate_chirp(
 ///
 /// # Returns
 /// * `Array[Int]` - Generated samples (all zeros)
-pub fn generate_silence(
-  sample_rate : Int,
-  duration_sec : Double,
-) -> Array[Int] {
+pub fn generate_silence(sample_rate : Int, duration_sec : Double) -> Array[Int] {
   let num_samples = (Double::from_int(sample_rate) * duration_sec).to_int()
   let samples = []
 

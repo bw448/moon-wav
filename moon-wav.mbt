@@ -58,7 +58,15 @@ pub fn make_wav_info(
   bits_per_sample : Int,
   data_size : Int,
 ) -> WavInfo {
-  { audio_format, num_channels, sample_rate, byte_rate, block_align, bits_per_sample, data_size }
+  {
+    audio_format,
+    num_channels,
+    sample_rate,
+    byte_rate,
+    block_align,
+    bits_per_sample,
+    data_size,
+  }
 }
 
 ///|
@@ -437,6 +445,6 @@ fn pow2(n : Int) -> Double {
   if n >= 0 {
     Double::from_int(1 << n)
   } else {
-    1.0 / Double::from_int(1 << (-n))
+    1.0 / Double::from_int(1 << -n)
   }
 }

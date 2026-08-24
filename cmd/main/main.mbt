@@ -29,7 +29,9 @@ fn demo_generate_and_encode() -> Unit {
 
   // Generate a 440Hz sine wave (A4 note), 0.5 seconds
   let audio = @lib.generate_sine_wav(440.0, 16000.0, 44100, 0.5, 16)
-  println("Generated " + audio.samples.length().to_string() + " samples at 440Hz")
+  println(
+    "Generated " + audio.samples.length().to_string() + " samples at 440Hz",
+  )
 
   // Encode to WAV format
   let wav_bytes = @lib.encode(audio)
@@ -37,9 +39,12 @@ fn demo_generate_and_encode() -> Unit {
 
   // Verify by decoding
   match @lib.decode(wav_bytes) {
-    Ok(decoded) => {
-      println("Decoded successfully: " + decoded.samples.length().to_string() + " samples")
-    }
+    Ok(decoded) =>
+      println(
+        "Decoded successfully: " +
+        decoded.samples.length().to_string() +
+        " samples",
+      )
     Err(_) => println("Decode failed!")
   }
   println("")
@@ -65,7 +70,9 @@ fn demo_decode_and_analyze() -> Unit {
       println("RMS level: " + analysis.rms.to_string())
       println("Zero crossings: " + analysis.zero_crossings.to_string())
       println("Has clipping: " + analysis.has_clipping.to_string())
-      println("Silence ratio: " + (analysis.silence_ratio * 100.0).to_string() + "%")
+      println(
+        "Silence ratio: " + (analysis.silence_ratio * 100.0).to_string() + "%",
+      )
     }
     Err(_) => println("Decode failed!")
   }
@@ -84,7 +91,9 @@ fn demo_processing_pipeline() -> Unit {
   let processed = @lib.fade_in(audio.samples, 2205) // 50ms fade in
   let processed = @lib.fade_out(processed, 2205) // 50ms fade out
   let processed = @lib.adjust_volume(processed, 0.8) // 80% volume
-  println("After fade in/out + volume: " + processed.length().to_string() + " samples")
+  println(
+    "After fade in/out + volume: " + processed.length().to_string() + " samples",
+  )
 
   // Reverse effect
   let reversed = @lib.reverse(processed)
@@ -115,14 +124,17 @@ fn demo_format_conversion() -> Unit {
   // Bit depth conversion
   let samples_16 = [1000, -1000, 2000, -2000]
   match @lib.convert_bit_depth(samples_16, 16, 8) {
-    Ok(samples_8) => println("16-bit to 8-bit: " + samples_8.length().to_string() + " samples")
+    Ok(samples_8) =>
+      println("16-bit to 8-bit: " + samples_8.length().to_string() + " samples")
     Err(_) => println("Conversion failed!")
   }
 
   // Resample
   let samples = @lib.generate_sine(440.0, 16000.0, 44100, 0.1)
   let resampled = @lib.resample(samples, 44100, 22050, 1)
-  println("Resampled 44100->22050: " + resampled.length().to_string() + " samples")
+  println(
+    "Resampled 44100->22050: " + resampled.length().to_string() + " samples",
+  )
   println("")
 }
 

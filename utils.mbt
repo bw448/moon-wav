@@ -19,14 +19,25 @@ pub fn format_wav_info(info : WavInfo) -> String {
     0.0
   }
 
-  "Format: " + format_str +
-    "\nChannels: " + channel_str +
-    "\nSample Rate: " + info.sample_rate.to_string() + " Hz" +
-    "\nBits Per Sample: " + info.bits_per_sample.to_string() +
-    "\nByte Rate: " + info.byte_rate.to_string() +
-    "\nBlock Align: " + info.block_align.to_string() +
-    "\nData Size: " + info.data_size.to_string() + " bytes" +
-    "\nDuration: " + duration.to_string() + " seconds"
+  "Format: " +
+  format_str +
+  "\nChannels: " +
+  channel_str +
+  "\nSample Rate: " +
+  info.sample_rate.to_string() +
+  " Hz" +
+  "\nBits Per Sample: " +
+  info.bits_per_sample.to_string() +
+  "\nByte Rate: " +
+  info.byte_rate.to_string() +
+  "\nBlock Align: " +
+  info.block_align.to_string() +
+  "\nData Size: " +
+  info.data_size.to_string() +
+  " bytes" +
+  "\nDuration: " +
+  duration.to_string() +
+  " seconds"
 }
 
 ///|
@@ -60,12 +71,13 @@ pub fn split_stereo(samples : Array[Int]) -> (Array[Int], Array[Int]) {
 ///
 /// # Returns
 /// * `Array[Int]` - Interleaved stereo samples [L0, R0, L1, R1, ...]
-pub fn combine_stereo(
-  left : Array[Int],
-  right : Array[Int],
-) -> Array[Int] {
+pub fn combine_stereo(left : Array[Int], right : Array[Int]) -> Array[Int] {
   let result = []
-  let max_len = if left.length() > right.length() { left.length() } else { right.length() }
+  let max_len = if left.length() > right.length() {
+    left.length()
+  } else {
+    right.length()
+  }
 
   let mut i = 0
   while i < max_len {
@@ -83,7 +95,8 @@ pub fn combine_stereo(
 /// Get the duration of audio in seconds.
 pub fn get_duration(audio : AudioData) -> Double {
   if audio.info.byte_rate > 0 {
-    Double::from_int(audio.info.data_size) / Double::from_int(audio.info.byte_rate)
+    Double::from_int(audio.info.data_size) /
+    Double::from_int(audio.info.byte_rate)
   } else {
     0.0
   }
@@ -202,10 +215,7 @@ pub fn repeat(samples : Array[Int], times : Int) -> Array[Int] {
 ///
 /// # Returns
 /// * `Array[Int]` - Padded samples
-pub fn pad_to_length(
-  samples : Array[Int],
-  target_length : Int,
-) -> Array[Int] {
+pub fn pad_to_length(samples : Array[Int], target_length : Int) -> Array[Int] {
   let result = []
 
   let mut i = 0

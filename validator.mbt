@@ -32,13 +32,22 @@ pub fn validate(data : Bytes) -> ValidationResult {
 
   // Check minimum file size (RIFF header = 12 bytes)
   if data.length() < 12 {
-    return { is_valid: false, warnings, error: Some("File too small: minimum 12 bytes required") }
+    return {
+      is_valid: false,
+      warnings,
+      error: Some("File too small: minimum 12 bytes required"),
+    }
   }
 
   // Check RIFF header
   match data {
     [b'R', b'I', b'F', b'F', _, _, _, _, b'W', b'A', b'V', b'E', ..] => ()
-    _ => return { is_valid: false, warnings, error: Some("Invalid RIFF/WAVE header") }
+    _ =>
+      return {
+        is_valid: false,
+        warnings,
+        error: Some("Invalid RIFF/WAVE header"),
+      }
   }
 
   // Parse RIFF size
@@ -66,11 +75,19 @@ pub fn validate(data : Bytes) -> ValidationResult {
       has_fmt = true
 
       if chunk_size < 16 {
-        return { is_valid: false, warnings, error: Some("fmt chunk too small: minimum 16 bytes") }
+        return {
+          is_valid: false,
+          warnings,
+          error: Some("fmt chunk too small: minimum 16 bytes"),
+        }
       }
 
       if pos + 8 + chunk_size > view.length() {
-        return { is_valid: false, warnings, error: Some("fmt chunk extends beyond file") }
+        return {
+          is_valid: false,
+          warnings,
+          error: Some("fmt chunk extends beyond file"),
+        }
       }
 
       fmt_audio_format = parse_le_u16_from_view(view, pos + 8)
@@ -84,15 +101,25 @@ pub fn validate(data : Bytes) -> ValidationResult {
       }
 
       if fmt_num_channels < 1 {
-        return { is_valid: false, warnings, error: Some("Invalid channel count: must be >= 1") }
+        return {
+          is_valid: false,
+          warnings,
+          error: Some("Invalid channel count: must be >= 1"),
+        }
       }
 
       if fmt_num_channels > 2 {
-        warnings.push("More than 2 channels detected; only mono and stereo are fully supported")
+        warnings.push(
+          "More than 2 channels detected; only mono and stereo are fully supported",
+        )
       }
 
       if fmt_sample_rate < 1 {
-        return { is_valid: false, warnings, error: Some("Invalid sample rate: must be >= 1") }
+        return {
+          is_valid: false,
+          warnings,
+          error: Some("Invalid sample rate: must be >= 1"),
+        }
       }
 
       if fmt_sample_rate > 192000 {
@@ -100,14 +127,24 @@ pub fn validate(data : Bytes) -> ValidationResult {
       }
 
       if fmt_audio_format == 1 {
-        if fmt_bits_per_sample != 8 && fmt_bits_per_sample != 16 &&
-          fmt_bits_per_sample != 24 && fmt_bits_per_sample != 32 {
-          return { is_valid: false, warnings, error: Some("Unsupported PCM bit depth: must be 8, 16, 24, or 32") }
+        if fmt_bits_per_sample != 8 &&
+          fmt_bits_per_sample != 16 &&
+          fmt_bits_per_sample != 24 &&
+          fmt_bits_per_sample != 32 {
+          return {
+            is_valid: false,
+            warnings,
+            error: Some("Unsupported PCM bit depth: must be 8, 16, 24, or 32"),
+          }
         }
       }
 
       if fmt_audio_format == 3 && fmt_bits_per_sample != 32 {
-        return { is_valid: false, warnings, error: Some("IEEE float format requires 32 bits per sample") }
+        return {
+          is_valid: false,
+          warnings,
+          error: Some("IEEE float format requires 32 bits per sample"),
+        }
       }
     } else if chunk_id == [b'd', b'a', b't', b'a'] {
       has_data = true
@@ -156,9 +193,9 @@ fn parse_le_u16_from_view(view : BytesView, pos : Int) -> Int {
 /// Parse a little-endian 32-bit unsigned integer from BytesView.
 fn parse_le_u32_from_view(view : BytesView, pos : Int) -> Int {
   view[pos].to_int() |
-    (view[pos + 1].to_int() << 8) |
-    (view[pos + 2].to_int() << 16) |
-    (view[pos + 3].to_int() << 24)
+  (view[pos + 1].to_int() << 8) |
+  (view[pos + 2].to_int() << 16) |
+  (view[pos + 3].to_int() << 24)
 }
 
 ///|
@@ -166,7 +203,7 @@ fn parse_le_u32_from_view(view : BytesView, pos : Int) -> Int {
 fn parse_le_u32(data : Bytes, offset : Int) -> Int {
   let view = data[:]
   view[offset].to_int() |
-    (view[offset + 1].to_int() << 8) |
-    (view[offset + 2].to_int() << 16) |
-    (view[offset + 3].to_int() << 24)
+  (view[offset + 1].to_int() << 8) |
+  (view[offset + 2].to_int() << 16) |
+  (view[offset + 3].to_int() << 24)
 }

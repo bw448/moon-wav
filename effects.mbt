@@ -206,10 +206,7 @@ pub fn high_pass_filter(samples : Array[Int], window_size : Int) -> Array[Int] {
 ///
 /// # Returns
 /// * `Array[Int]` - Processed samples
-pub fn reverse_reverb(
-  samples : Array[Int],
-  fade_samples : Int,
-) -> Array[Int] {
+pub fn reverse_reverb(samples : Array[Int], fade_samples : Int) -> Array[Int] {
   let reversed = reverse(samples)
   fade_in(reversed, fade_samples)
 }

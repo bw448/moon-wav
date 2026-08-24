@@ -3,8 +3,7 @@
 ///|
 test "validate_riff_header valid" {
   let data = Bytes::from_array([
-    b'R', b'I', b'F', b'F', 0, 0, 0, 0,
-    b'W', b'A', b'V', b'E',
+    b'R', b'I', b'F', b'F', 0, 0, 0, 0, b'W', b'A', b'V', b'E',
   ])
   let result = validate_riff_header(data)
   assert_true(result is Ok(_))
@@ -13,8 +12,7 @@ test "validate_riff_header valid" {
 ///|
 test "validate_riff_header invalid magic" {
   let data = Bytes::from_array([
-    b'N', b'O', b'T', b'R', 0, 0, 0, 0,
-    b'W', b'A', b'V', b'E',
+    b'N', b'O', b'T', b'R', 0, 0, 0, 0, b'W', b'A', b'V', b'E',
   ])
   let result = validate_riff_header(data)
   assert_true(result is Err(InvalidHeader))
@@ -29,9 +27,7 @@ test "validate_riff_header too short" {
 
 ///|
 test "parse_chunk_header valid" {
-  let view = Bytes::from_array([
-    b'f', b'm', b't', b' ', 16, 0, 0, 0,
-  ])
+  let view = Bytes::from_array([b'f', b'm', b't', b' ', 16, 0, 0, 0])
   let result = parse_chunk_header(view, 0)
 
   match result {
@@ -84,7 +80,7 @@ test "decode_pcm_16bit basic" {
 test "decode_pcm_24bit basic" {
   let data = Bytes::from_array([
     0xA0, 0x86, 0x01, // 100000
-    0x60, 0x79, 0xFE, // -100000
+     0x60, 0x79, 0xFE, // -100000
   ])
   let result = decode_pcm_24bit(data)
 
@@ -102,7 +98,7 @@ test "decode_pcm_24bit basic" {
 test "decode_pcm_32bit basic" {
   let data = Bytes::from_array([
     0x40, 0x42, 0x0F, 0x00, // 1000000
-    0xC0, 0xBD, 0xF0, 0xFF, // -1000000
+     0xC0, 0xBD, 0xF0, 0xFF, // -1000000
   ])
   let result = decode_pcm_32bit(data)
 

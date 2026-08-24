@@ -145,10 +145,7 @@ pub fn count_clipped_samples(
 
 ///|
 /// Count the number of silent samples (absolute value below threshold).
-pub fn count_silent_samples(
-  samples : Array[Int],
-  threshold : Int,
-) -> Int {
+pub fn count_silent_samples(samples : Array[Int], threshold : Int) -> Int {
   let mut count = 0
   let mut i = 0
   while i < samples.length() {
@@ -173,11 +170,19 @@ pub fn format_analysis(analysis : AudioAnalysis) -> String {
   lines.push("DC offset: " + analysis.dc_offset.to_string())
   lines.push("Zero crossings: " + analysis.zero_crossings.to_string())
   lines.push(
-    "Clipping: " + (if analysis.has_clipping { "YES (" + analysis.clipped_samples.to_string() + " samples)" } else { "No" }),
+    "Clipping: " +
+    (if analysis.has_clipping {
+      "YES (" + analysis.clipped_samples.to_string() + " samples)"
+    } else {
+      "No"
+    }),
   )
   lines.push(
-    "Silence: " + (if analysis.is_silent { "YES" } else { "No" }) +
-      " (" + (analysis.silence_ratio * 100.0).to_string() + "%)",
+    "Silence: " +
+    (if analysis.is_silent { "YES" } else { "No" }) +
+    " (" +
+    (analysis.silence_ratio * 100.0).to_string() +
+    "%)",
   )
 
   // Concatenate all lines

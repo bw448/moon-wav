@@ -29,7 +29,8 @@ moon add bw448/moon-wav
 
 ## 🚀 Quick Start
 
-```moonbit
+```moonbit nocheck
+///|
 fn main {
   // Generate a 440Hz sine wave
   let audio = generate_sine_wav(440.0, 16000.0, 44100, 1.0, 16)
@@ -56,30 +57,33 @@ fn main {
 
 #### `WavInfo`
 
-```moonbit
+```moonbit nocheck
+///|
 pub struct WavInfo {
-  audio_format : Int    // 1 = PCM, 3 = IEEE float
-  num_channels : Int    // 1 = mono, 2 = stereo
-  sample_rate : Int     // Sample rate in Hz (e.g., 44100)
-  byte_rate : Int       // Byte rate
-  block_align : Int     // Block align
+  audio_format : Int // 1 = PCM, 3 = IEEE float
+  num_channels : Int // 1 = mono, 2 = stereo
+  sample_rate : Int // Sample rate in Hz (e.g., 44100)
+  byte_rate : Int // Byte rate
+  block_align : Int // Block align
   bits_per_sample : Int // 8, 16, 24, or 32
-  data_size : Int       // Data size in bytes
+  data_size : Int // Data size in bytes
 }
 ```
 
 #### `AudioData`
 
-```moonbit
+```moonbit nocheck
+///|
 pub struct AudioData {
-  samples : Array[Int]  // Decoded samples (32-bit signed integers)
-  info : WavInfo        // Format information
+  samples : Array[Int] // Decoded samples (32-bit signed integers)
+  info : WavInfo // Format information
 }
 ```
 
 #### `WavError`
 
-```moonbit
+```moonbit nocheck
+///|
 pub enum WavError {
   InvalidHeader
   UnsupportedFormat
@@ -90,7 +94,8 @@ pub enum WavError {
 
 #### `ValidationResult`
 
-```moonbit
+```moonbit nocheck
+///|
 pub struct ValidationResult {
   is_valid : Bool
   warnings : Array[String]
@@ -100,7 +105,8 @@ pub struct ValidationResult {
 
 #### `AudioAnalysis`
 
-```moonbit
+```moonbit nocheck
+///|
 pub struct AudioAnalysis {
   duration_sec : Double
   samples_per_channel : Int
@@ -249,7 +255,7 @@ pub struct AudioAnalysis {
 
 ### Generate and Encode WAV
 
-```moonbit
+```moonbit nocheck
 let audio = generate_sine_wav(440.0, 16000.0, 44100, 1.0, 16)
 let wav_bytes = encode(audio)
 println("WAV file: " + wav_bytes.length().to_string() + " bytes")
@@ -257,7 +263,7 @@ println("WAV file: " + wav_bytes.length().to_string() + " bytes")
 
 ### Validate WAV File
 
-```moonbit
+```moonbit nocheck
 let result = validate(wav_data)
 if result.is_valid {
   println("Valid WAV file")
@@ -268,7 +274,7 @@ if result.is_valid {
 
 ### Audio Analysis
 
-```moonbit
+```moonbit nocheck
 match decode(wav_data) {
   Ok(audio) => {
     let analysis = analyze(audio, 100)
@@ -282,11 +288,20 @@ match decode(wav_data) {
 
 ### Processing Pipeline
 
-```moonbit
+```moonbit nocheck
+///|
 let audio = generate_sine_wav(440.0, 16000.0, 44100, 1.0, 16)
+
+///|
 let processed = fade_in(audio.samples, 4410) // 100ms fade in
+
+///|
 let processed = fade_out(processed, 4410) // 100ms fade out
+
+///|
 let processed = normalize(processed, 32000) // Normalize
+
+///|
 let encoded = encode({ samples: processed, info: audio.info })
 ```
 

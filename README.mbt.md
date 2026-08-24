@@ -12,7 +12,9 @@ A native MoonBit WAV audio decoding library.
 ## ✨ Features / 功能特性
 
 - **WAV 文件解析** - 解析 RIFF 头部、fmt 块、data 块
-- **PCM 音频解码** - 支持 8 位、16 位、24 位 PCM 音频
+- **PCM 音频解码** - 支持 8 位、16 位、24 位、32 位 PCM 音频
+- **IEEE float 解码** - 支持 IEEE 754 32 位浮点音频
+- **WAV 编码** - 将音频数据编码为 WAV 文件
 - **声道支持** - 单声道和立体声
 - **格式转换** - 位深转换、声道转换、采样率转换
 - **音频操作** - 裁剪、拼接、音量调整、混音、淡入淡出、反转
@@ -91,8 +93,15 @@ pub enum WavError {
 
 | Function | Description |
 |----------|-------------|
-| `decode(data : Bytes) -> Result[AudioData, WavError]` | Decode a WAV file from bytes |
+| `decode(data : Bytes) -> Result[AudioData, WavError]` | Decode a WAV file from bytes (PCM & IEEE float) |
 | `get_info(data : Bytes) -> Result[WavInfo, WavError]` | Get WAV file information without decoding audio data |
+
+### Encoding Functions
+
+| Function | Description |
+|----------|-------------|
+| `encode(audio : AudioData) -> Bytes` | Encode audio data to WAV format |
+| `encode_with_format(samples, num_channels, sample_rate, bits_per_sample) -> Bytes` | Encode samples with specified format |
 
 ### Conversion Functions
 
@@ -159,6 +168,15 @@ match decode(wav_data) {
   }
   Err(_) => ()
 }
+```
+
+### Encode WAV File
+
+```moonbit
+// Encode samples directly to WAV format
+let samples = [1000, -1000, 2000, -2000]
+let wav_bytes = encode_with_format(samples, 1, 44100, 16)
+println("Encoded " + wav_bytes.length().to_string() + " bytes")
 ```
 
 ## 🔨 Building

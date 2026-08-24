@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-08-24
+
+### Added
+
+- **WAV validator**: `validate()` function with detailed error reporting and warnings
+- **Audio analysis**: `analyze()` function with peak, RMS, DC offset, zero crossings, clipping detection, silence detection
+- **Waveform generators**: sine, square, sawtooth, triangle, noise, chirp, silence
+- **Audio effects**: echo, delay, normalize, soft clip, DC offset removal, low-pass filter, high-pass filter, reverse reverb
+- **Utility functions**: format_wav_info, split_stereo, combine_stereo, get_duration, get_frame_count, extract_channel, mix_multiple, repeat, pad_to_length, cross_correlation
+- **Whitebox tests**: Internal function tests for decode_pcm_8bit/16bit/24bit/32bit, validate_riff_header, parse_chunk_header
+- **Edge case tests**: Empty data, truncated files, 24-bit stereo, cascading effects, filter behavior
+- **Comprehensive examples**: Complete demo with generate, encode, decode, analyze, process, validate
+
+### Changed
+
+- Updated README with complete API reference for all modules
+- Added limitations/boundary documentation (supported formats, channel support, known limits)
+- Updated moon.mod version to 0.3.0
+
 ## [0.2.0] - 2026-08-24
 
 ### Added

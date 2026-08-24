@@ -3,16 +3,8 @@
 ///|
 test "analyze basic audio" {
   let samples = [100, -100, 200, -200, 300, -300]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 88200,
-    block_align: 2,
-    bits_per_sample: 16,
-    data_size: 12,
-  }
-  let audio : AudioData = { samples, info }
+  let info = make_wav_info(1, 1, 44100, 88200, 2, 16, 12)
+  let audio = make_audio_data(samples, info)
   let result = analyze(audio, 100)
 
   assert_true(result.peak > 0)
@@ -81,16 +73,8 @@ test "count_silent_samples" {
 ///|
 test "analyze silence detection" {
   let samples = [0, 0, 0, 0, 0, 1000]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 88200,
-    block_align: 2,
-    bits_per_sample: 16,
-    data_size: 12,
-  }
-  let audio : AudioData = { samples, info }
+  let info = make_wav_info(1, 1, 44100, 88200, 2, 16, 12)
+  let audio = make_audio_data(samples, info)
   let result = analyze(audio, 100)
 
   assert_true(!result.is_silent) // Not 95% silent

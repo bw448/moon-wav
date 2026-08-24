@@ -48,6 +48,26 @@ pub enum WavError {
 } derive(Debug, Eq)
 
 ///|
+/// Create a new WavInfo with the given parameters.
+pub fn make_wav_info(
+  audio_format : Int,
+  num_channels : Int,
+  sample_rate : Int,
+  byte_rate : Int,
+  block_align : Int,
+  bits_per_sample : Int,
+  data_size : Int,
+) -> WavInfo {
+  { audio_format, num_channels, sample_rate, byte_rate, block_align, bits_per_sample, data_size }
+}
+
+///|
+/// Create a new AudioData with the given samples and info.
+pub fn make_audio_data(samples : Array[Int], info : WavInfo) -> AudioData {
+  { samples, info }
+}
+
+///|
 /// Parse a WAV file from bytes and return the decoded audio data.
 ///
 /// # Arguments
@@ -387,10 +407,11 @@ fn decode_ieee_float(data : Bytes) -> Result[Array[Int], WavError] {
         0.0
       }
     } else {
-      // Normalized
-      let exp_val = Double::from_int(exponent - 127)
+      // Normalized: value = sign * (1 + mantissa/2^23) * 2^(exponent-127)
+      let exp_bias = exponent - 127
       let mantissa_val = 1.0 + Double::from_int(mantissa) / 8388608.0
-      sign * mantissa_val * exp_val.exp2()
+      let power_of_two = pow2(exp_bias)
+      sign * mantissa_val * power_of_two
     }
 
     // Scale to 32-bit integer range [-2^31, 2^31-1]
@@ -408,4 +429,14 @@ fn decode_ieee_float(data : Bytes) -> Result[Array[Int], WavError] {
   }
 
   Ok(samples)
+}
+
+///|
+/// Compute 2^n for integer n (supports negative exponents).
+fn pow2(n : Int) -> Double {
+  if n >= 0 {
+    Double::from_int(1 << n)
+  } else {
+    1.0 / Double::from_int(1 << (-n))
+  }
 }

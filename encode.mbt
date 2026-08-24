@@ -25,12 +25,12 @@ pub fn encode(audio : AudioData) -> Bytes {
   // fmt chunk
   buf.write_bytes(b"fmt ")
   buf.write_int_le(16) // chunk size
-  buf.write_int16_le(info.audio_format.to_int16())
-  buf.write_int16_le(info.num_channels.to_int16())
+  buf.write_int16_le(Int16::from_int(info.audio_format))
+  buf.write_int16_le(Int16::from_int(info.num_channels))
   buf.write_int_le(info.sample_rate)
   buf.write_int_le(info.byte_rate)
-  buf.write_int16_le(info.block_align.to_int16())
-  buf.write_int16_le(info.bits_per_sample.to_int16())
+  buf.write_int16_le(Int16::from_int(info.block_align))
+  buf.write_int16_le(Int16::from_int(info.bits_per_sample))
 
   // data chunk
   buf.write_bytes(b"data")
@@ -107,7 +107,7 @@ fn encode_samples_16bit(buf : Buffer, samples : Array[Int]) -> Unit {
     } else {
       samples[i]
     }
-    buf.write_int16_le(clamped.to_int16())
+    buf.write_int16_le(Int16::from_int(clamped))
     i = i + 1
   }
 }

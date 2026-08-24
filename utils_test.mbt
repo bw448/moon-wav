@@ -2,15 +2,7 @@
 
 ///|
 test "format_wav_info" {
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 2,
-    sample_rate: 44100,
-    byte_rate: 176400,
-    block_align: 4,
-    bits_per_sample: 16,
-    data_size: 176400,
-  }
+  let info = make_wav_info(1, 2, 44100, 176400, 4, 16, 176400)
   let formatted = format_wav_info(info)
 
   // Should contain key information
@@ -65,16 +57,8 @@ test "split and combine roundtrip" {
 
 ///|
 test "get_duration" {
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 88200,
-    block_align: 2,
-    bits_per_sample: 16,
-    data_size: 88200,
-  }
-  let audio : AudioData = { samples: [], info }
+  let info = make_wav_info(1, 1, 44100, 88200, 2, 16, 88200)
+  let audio = make_audio_data([], info)
   let duration = get_duration(audio)
 
   // 88200 / 88200 = 1.0 second
@@ -83,16 +67,8 @@ test "get_duration" {
 
 ///|
 test "get_frame_count mono" {
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 88200,
-    block_align: 2,
-    bits_per_sample: 16,
-    data_size: 8,
-  }
-  let audio : AudioData = { samples: [100, 200, 300, 400], info }
+  let info = make_wav_info(1, 1, 44100, 88200, 2, 16, 8)
+  let audio = make_audio_data([100, 200, 300, 400], info)
   let frames = get_frame_count(audio)
 
   assert_eq(frames, 4)
@@ -100,16 +76,8 @@ test "get_frame_count mono" {
 
 ///|
 test "get_frame_count stereo" {
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 2,
-    sample_rate: 44100,
-    byte_rate: 176400,
-    block_align: 4,
-    bits_per_sample: 16,
-    data_size: 8,
-  }
-  let audio : AudioData = { samples: [100, 200, 300, 400], info }
+  let info = make_wav_info(1, 2, 44100, 176400, 4, 16, 8)
+  let audio = make_audio_data([100, 200, 300, 400], info)
   let frames = get_frame_count(audio)
 
   assert_eq(frames, 2) // 4 samples / 2 channels = 2 frames

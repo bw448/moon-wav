@@ -21,13 +21,13 @@ fn create_test_wav(
   buf.write_bytes(b"fmt ")
   buf.write_int_le(16) // chunk size
   buf.write_int16_le(1) // PCM format
-  buf.write_int16_le(num_channels.to_int16())
+  buf.write_int16_le(Int16::from_int(num_channels))
   buf.write_int_le(sample_rate)
   let byte_rate = sample_rate * num_channels * (bits_per_sample / 8)
   buf.write_int_le(byte_rate)
   let block_align = num_channels * (bits_per_sample / 8)
-  buf.write_int16_le(block_align.to_int16())
-  buf.write_int16_le(bits_per_sample.to_int16())
+  buf.write_int16_le(Int16::from_int(block_align))
+  buf.write_int16_le(Int16::from_int(bits_per_sample))
 
   // data chunk
   buf.write_bytes(b"data")
@@ -47,7 +47,7 @@ fn create_test_wav(
         } else {
           sample
         }
-        buf.write_int16_le(clamped.to_int16())
+        buf.write_int16_le(Int16::from_int(clamped))
       }
       24 => {
         let clamped = if sample < -8388608 {
@@ -240,8 +240,8 @@ test "decode IEEE float mono WAV" {
   buf.write_int_le(sample_rate)
   let byte_rate = sample_rate * 1 * 4
   buf.write_int_le(byte_rate)
-  buf.write_int16_le(4) // block align
-  buf.write_int16_le(bits_per_sample)
+  buf.write_int16_le(Int16::from_int(4)) // block align
+  buf.write_int16_le(Int16::from_int(bits_per_sample))
 
   // data chunk
   buf.write_bytes(b"data")

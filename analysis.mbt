@@ -179,6 +179,16 @@ pub fn format_analysis(analysis : AudioAnalysis) -> String {
     "Silence: " + (if analysis.is_silent { "YES" } else { "No" }) +
       " (" + (analysis.silence_ratio * 100.0).to_string() + "%)",
   )
-  lines.length() // Just return count for now; actual string concat depends on MoonBit API
-  lines[0] // Return first line as placeholder
+
+  // Concatenate all lines
+  let mut result = ""
+  let mut i = 0
+  while i < lines.length() {
+    if i > 0 {
+      result = result + "\n"
+    }
+    result = result + lines[i]
+    i = i + 1
+  }
+  result
 }

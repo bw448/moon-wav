@@ -3,17 +3,9 @@
 ///|
 test "encode 16-bit mono WAV roundtrip" {
   let samples = [100, -100, 200, -200]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 88200,
-    block_align: 2,
-    bits_per_sample: 16,
-    data_size: 8,
-  }
+  let info = make_wav_info(1, 1, 44100, 88200, 2, 16, 8)
 
-  let encoded = encode({ samples, info })
+  let encoded = encode(make_audio_data(samples, info))
   let decoded = decode(encoded)
 
   assert_true(decoded is Ok(_))
@@ -36,17 +28,9 @@ test "encode 16-bit mono WAV roundtrip" {
 ///|
 test "encode 8-bit mono WAV roundtrip" {
   let samples = [0, 50, -50, 100]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 22050,
-    byte_rate: 22050,
-    block_align: 1,
-    bits_per_sample: 8,
-    data_size: 4,
-  }
+  let info = make_wav_info(1, 1, 22050, 22050, 1, 8, 4)
 
-  let encoded = encode({ samples, info })
+  let encoded = encode(make_audio_data(samples, info))
   let decoded = decode(encoded)
 
   assert_true(decoded is Ok(_))
@@ -55,8 +39,6 @@ test "encode 8-bit mono WAV roundtrip" {
     Ok(audio) => {
       assert_eq(audio.info.bits_per_sample, 8)
       assert_eq(audio.samples.length(), 4)
-      // 8-bit: encode (sample + 128), decode (byte - 128)
-      // 0 -> 128 -> 0, 50 -> 178 -> 50, -50 -> 78 -> -50, 100 -> 228 -> 100
       assert_eq(audio.samples[0], 0)
       assert_eq(audio.samples[1], 50)
       assert_eq(audio.samples[2], -50)
@@ -69,17 +51,9 @@ test "encode 8-bit mono WAV roundtrip" {
 ///|
 test "encode 16-bit stereo WAV roundtrip" {
   let samples = [100, 200, -100, -200]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 2,
-    sample_rate: 44100,
-    byte_rate: 176400,
-    block_align: 4,
-    bits_per_sample: 16,
-    data_size: 8,
-  }
+  let info = make_wav_info(1, 2, 44100, 176400, 4, 16, 8)
 
-  let encoded = encode({ samples, info })
+  let encoded = encode(make_audio_data(samples, info))
   let decoded = decode(encoded)
 
   assert_true(decoded is Ok(_))
@@ -123,17 +97,9 @@ test "encode_with_format helper" {
 ///|
 test "encode 24-bit mono WAV roundtrip" {
   let samples = [100000, -100000, 200000, -200000]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 132300,
-    block_align: 3,
-    bits_per_sample: 24,
-    data_size: 12,
-  }
+  let info = make_wav_info(1, 1, 44100, 132300, 3, 24, 12)
 
-  let encoded = encode({ samples, info })
+  let encoded = encode(make_audio_data(samples, info))
   let decoded = decode(encoded)
 
   assert_true(decoded is Ok(_))

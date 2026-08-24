@@ -200,10 +200,7 @@ pub fn generate_chirp(
   let mut i = 0
   while i < num_samples {
     let t = Double::from_int(i) / Double::from_int(sample_rate)
-    let progress = t / t_total
-    // Linear frequency interpolation
-    let freq = start_freq + (end_freq - start_freq) * progress
-    // Phase = integral of 2*pi*freq(t) dt
+    // Phase = integral of 2*pi*freq(t) dt where freq(t) = start_freq + (end_freq - start_freq) * t / t_total
     let phase = 2.0 * pi * (start_freq * t + (end_freq - start_freq) * t * t / (2.0 * t_total))
     let sin_val = phase -
       phase * phase * phase / 6.0 +

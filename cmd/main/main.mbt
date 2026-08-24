@@ -24,7 +24,7 @@ fn main {
 }
 
 ///|
-fn demo_generate_and_encode {
+fn demo_generate_and_encode() -> Unit {
   println("--- 1. Generate & Encode ---")
 
   // Generate a 440Hz sine wave (A4 note), 0.5 seconds
@@ -46,11 +46,10 @@ fn demo_generate_and_encode {
 }
 
 ///|
-fn demo_decode_and_analyze {
+fn demo_decode_and_analyze() -> Unit {
   println("--- 2. Decode & Analyze ---")
 
-  // Create a test WAV with some interesting properties
-  let samples = @lib.generate_sine(1000.0, 20000.0, 44100, 0.2)
+  // Create a test WAV
   let audio = @lib.generate_sine_wav(1000.0, 20000.0, 44100, 0.2, 16)
   let wav_data = @lib.encode(audio)
 
@@ -74,7 +73,7 @@ fn demo_decode_and_analyze {
 }
 
 ///|
-fn demo_processing_pipeline {
+fn demo_processing_pipeline() -> Unit {
   println("--- 3. Processing Pipeline ---")
 
   // Generate source audio
@@ -98,7 +97,7 @@ fn demo_processing_pipeline {
 }
 
 ///|
-fn demo_format_conversion {
+fn demo_format_conversion() -> Unit {
   println("--- 4. Format Conversion ---")
 
   // Create stereo audio
@@ -128,7 +127,7 @@ fn demo_format_conversion {
 }
 
 ///|
-fn demo_validation {
+fn demo_validation() -> Unit {
   println("--- 5. Validation ---")
 
   // Create a valid WAV

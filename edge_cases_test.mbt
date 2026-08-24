@@ -70,17 +70,9 @@ test "get_info does not decode samples" {
 ///|
 test "encode decode 32-bit roundtrip" {
   let samples = [1000000, -1000000, 2000000, -2000000]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 176400,
-    block_align: 4,
-    bits_per_sample: 32,
-    data_size: 16,
-  }
+  let info = make_wav_info(1, 1, 44100, 176400, 4, 32, 16)
 
-  let encoded = encode({ samples, info })
+  let encoded = encode(make_audio_data(samples, info))
   let decoded = decode(encoded)
 
   match decoded {
@@ -202,7 +194,10 @@ test "validate truncated file" {
   let wav_data = create_test_wav(1, 44100, 16, samples)
 
   // Take only first 20 bytes (truncated)
-  let truncated = wav_data[:20]
+  let truncated_view = wav_data[:20]
+  let buf = Buffer(size_hint=20)
+  buf.write_bytesview(truncated_view)
+  let truncated = buf.to_bytes()
   let result = validate(truncated)
 
   // Should detect truncation
@@ -212,16 +207,8 @@ test "validate truncated file" {
 ///|
 test "analyze clipping detection" {
   let samples = [32767, 32767, 32767, 100, -32768, -32768]
-  let info : WavInfo = {
-    audio_format: 1,
-    num_channels: 1,
-    sample_rate: 44100,
-    byte_rate: 88200,
-    block_align: 2,
-    bits_per_sample: 16,
-    data_size: 12,
-  }
-  let audio : AudioData = { samples, info }
+  let info = make_wav_info(1, 1, 44100, 88200, 2, 16, 12)
+  let audio = make_audio_data(samples, info)
   let result = analyze(audio, 100)
 
   assert_true(result.has_clipping)

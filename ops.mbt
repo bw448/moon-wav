@@ -118,10 +118,19 @@ pub fn fade_in(samples : Array[Int], fade_samples : Int) -> Array[Int] {
     fade_samples
   }
 
+  // Use fade_len-1 as divisor when fade covers entire signal
+  // so the last sample reaches full volume (factor = 1.0)
+  let is_full_fade = fade_len == samples.length()
+  let divisor = if is_full_fade && fade_len > 1 {
+    Double::from_int(fade_len - 1)
+  } else {
+    Double::from_int(fade_len)
+  }
+
   let mut i = 0
   while i < samples.length() {
     if i < fade_len {
-      let factor = Double::from_int(i) / Double::from_int(fade_len)
+      let factor = Double::from_int(i) / divisor
       let faded = (Double::from_int(samples[i]) * factor).to_int()
       result.push(faded)
     } else {
@@ -151,11 +160,19 @@ pub fn fade_out(samples : Array[Int], fade_samples : Int) -> Array[Int] {
   }
   let fade_start = samples.length() - fade_len
 
+  // Use fade_len-1 as divisor when fade covers entire signal
+  // so the first sample starts at full volume (factor = 1.0)
+  let is_full_fade = fade_len == samples.length()
+  let divisor = if is_full_fade && fade_len > 1 {
+    Double::from_int(fade_len - 1)
+  } else {
+    Double::from_int(fade_len)
+  }
+
   let mut i = 0
   while i < samples.length() {
     if i >= fade_start {
-      let factor = Double::from_int(samples.length() - 1 - i) /
-        Double::from_int(fade_len)
+      let factor = Double::from_int(samples.length() - 1 - i) / divisor
       let faded = (Double::from_int(samples[i]) * factor).to_int()
       result.push(faded)
     } else {

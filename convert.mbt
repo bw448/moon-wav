@@ -117,16 +117,16 @@ pub fn resample(
 }
 
 ///|
-/// Normalize samples to 32-bit range.
+/// Normalize samples to [-1.0, 1.0] range.
 fn normalize_samples(samples : Array[Int], from_bits : Int) -> Array[Double] {
-  let scale = match from_bits {
-    8 => 1.0 / 128.0
-    16 => 1.0 / 32768.0
-    24 => 1.0 / 8388608.0
-    _ => 1.0
+  match from_bits {
+    // 8-bit PCM is unsigned [0, 255], centered at 128
+    8 => samples.map(fn(sample) { Double::from_int(sample - 128) / 128.0 })
+    16 => samples.map(fn(sample) { Double::from_int(sample) / 32768.0 })
+    24 => samples.map(fn(sample) { Double::from_int(sample) / 8388608.0 })
+    32 => samples.map(fn(sample) { Double::from_int(sample) / 2147483648.0 })
+    _ => samples.map(fn(sample) { Double::from_int(sample) })
   }
-
-  samples.map(fn(sample) { Double::from_int(sample) * scale })
 }
 
 ///|

@@ -20,16 +20,36 @@ pub fn generate_sine(
   let num_samples = (Double::from_int(sample_rate) * duration_sec).to_int()
   let samples = []
   let pi = 3.141592653589793
+  let two_pi = 2.0 * pi
 
   let mut i = 0
   while i < num_samples {
     let t = Double::from_int(i) / Double::from_int(sample_rate)
-    let angle = 2.0 * pi * frequency * t
-    let sin_val = angle -
-      angle * angle * angle / 6.0 +
-      angle * angle * angle * angle * angle / 120.0 -
-      angle * angle * angle * angle * angle * angle * angle / 5040.0
-    let sample = (amplitude * sin_val).to_int()
+    let angle = two_pi * frequency * t
+
+    // Reduce angle to [0, 2*pi) range
+    let reduced = angle - two_pi * (angle / two_pi).floor()
+
+    // Use symmetry: reduce to [0, pi/2] quadrant
+    let (x, sign) = if reduced < pi {
+      if reduced < pi / 2.0 {
+        (reduced, 1.0)
+      } else {
+        (pi - reduced, 1.0)
+      }
+    } else {
+      if reduced < 3.0 * pi / 2.0 {
+        (reduced - pi, -1.0)
+      } else {
+        (two_pi - reduced, -1.0)
+      }
+    }
+
+    // Taylor series for sin(x) in [0, pi/2] with 6 terms
+    let x2 = x * x
+    let sin_val = x * (1.0 - x2 * (1.0 / 6.0 - x2 * (1.0 / 120.0 - x2 * (1.0 / 5040.0 - x2 * (1.0 / 362880.0 - x2 / 39916800.0)))))
+
+    let sample = (amplitude * sign * sin_val).to_int()
     samples.push(sample)
     i = i + 1
   }
@@ -195,17 +215,26 @@ pub fn generate_chirp(
   let num_samples = (Double::from_int(sample_rate) * duration_sec).to_int()
   let samples = []
   let pi = 3.141592653589793
+  let two_pi = 2.0 * pi
   let t_total = duration_sec
 
   let mut i = 0
   while i < num_samples {
     let t = Double::from_int(i) / Double::from_int(sample_rate)
-    // Phase = integral of 2*pi*freq(t) dt where freq(t) = start_freq + (end_freq - start_freq) * t / t_total
-    let phase = 2.0 * pi * (start_freq * t + (end_freq - start_freq) * t * t / (2.0 * t_total))
-    let sin_val = phase -
-      phase * phase * phase / 6.0 +
-      phase * phase * phase * phase * phase / 120.0
-    let sample = (amplitude * sin_val).to_int()
+    // Phase = integral of 2*pi*freq(t) dt
+    let phase = two_pi * (start_freq * t + (end_freq - start_freq) * t * t / (2.0 * t_total))
+
+    // Reduce angle to [0, 2*pi) and use symmetry
+    let reduced = phase - two_pi * (phase / two_pi).floor()
+    let (x, sign) = if reduced < pi {
+      if reduced < pi / 2.0 { (reduced, 1.0) } else { (pi - reduced, 1.0) }
+    } else {
+      if reduced < 3.0 * pi / 2.0 { (reduced - pi, -1.0) } else { (two_pi - reduced, -1.0) }
+    }
+    let x2 = x * x
+    let sin_val = x * (1.0 - x2 * (1.0 / 6.0 - x2 * (1.0 / 120.0 - x2 / 5040.0)))
+
+    let sample = (amplitude * sign * sin_val).to_int()
     samples.push(sample)
     i = i + 1
   }

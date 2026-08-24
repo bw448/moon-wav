@@ -181,12 +181,12 @@ test "non-PCM format returns error" {
   buf.write_bytes(b"WAVE")
   buf.write_bytes(b"fmt ")
   buf.write_int_le(16)
-  buf.write_int16_le(3) // IEEE float format
-  buf.write_int16_le(1)
+  buf.write_int16_le(Int16::from_int(2)) // ADPCM format (unsupported)
+  buf.write_int16_le(Int16::from_int(1))
   buf.write_int_le(44100)
   buf.write_int_le(88200)
-  buf.write_int16_le(2)
-  buf.write_int16_le(16)
+  buf.write_int16_le(Int16::from_int(2))
+  buf.write_int16_le(Int16::from_int(16))
   buf.write_bytes(b"data")
   buf.write_int_le(0)
 

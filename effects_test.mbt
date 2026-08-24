@@ -2,15 +2,16 @@
 
 ///|
 test "echo basic" {
-  let samples = [1000, 0, 0, 0, 0]
+  let samples = [1000, 0, 0, 0, 0, 0]
   let result = echo(samples, 2, 0.5)
 
-  assert_eq(result.length(), 5)
-  assert_eq(result[0], 1000)
+  assert_eq(result.length(), 6)
+  assert_eq(result[0], 1000) // original
   assert_eq(result[1], 0)
-  assert_eq(result[2], 500) // echo of 1000 * 0.5
+  assert_eq(result[2], 500) // echo of result[0] * 0.5
   assert_eq(result[3], 0)
-  assert_eq(result[4], 0)
+  assert_eq(result[4], 250) // echo of result[2] * 0.5 (cascading)
+  assert_eq(result[5], 0)
 }
 
 ///|

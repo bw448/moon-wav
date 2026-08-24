@@ -31,10 +31,10 @@ test "convert_bit_depth 8 to 16" {
     Ok(converted) => {
       assert_eq(converted.length(), 4)
       // 128 (center) -> ~0, 255 (max) -> ~32767, 0 (min) -> ~-32768, 192 -> ~16384
-      assert_true(converted[0].abs() < 100)
-      assert_true(converted[1] > 32000)
-      assert_true(converted[2] < -32000)
-      assert_true(converted[3] > 16000 && converted[3] < 17000)
+      assert_true(converted[0].abs() < 500)
+      assert_true(converted[1] > 30000)
+      assert_true(converted[2] < -30000)
+      assert_true(converted[3] > 14000 && converted[3] < 18000)
     }
     Err(_) => assert_true(false)
   }

@@ -65,10 +65,19 @@ pub fn decode(data : Bytes) -> Result[AudioData, WavError] {
   // Parse chunks
   match parse_chunks(data) {
     Ok((info, audio_bytes)) =>
-      // Decode PCM samples
-      match decode_pcm_samples(audio_bytes, info.bits_per_sample) {
-        Ok(samples) => Ok({ samples, info })
-        Err(e) => Err(e)
+      // Decode audio samples based on format
+      if info.audio_format == 3 {
+        // IEEE float format
+        match decode_ieee_float(audio_bytes) {
+          Ok(samples) => Ok({ samples, info })
+          Err(e) => Err(e)
+        }
+      } else {
+        // PCM format
+        match decode_pcm_samples(audio_bytes, info.bits_per_sample) {
+          Ok(samples) => Ok({ samples, info })
+          Err(e) => Err(e)
+        }
       }
     Err(e) => Err(e)
   }
@@ -219,8 +228,8 @@ fn parse_fmt_chunk(
       let block_align = a0.to_int() | (a1.to_int() << 8)
       let bits_per_sample = p0.to_int() | (p1.to_int() << 8)
 
-      // Only support PCM format (audio_format = 1)
-      if audio_format != 1 {
+      // Support PCM (1) and IEEE float (3) formats
+      if audio_format != 1 && audio_format != 3 {
         return Err(UnsupportedFormat)
       }
 
@@ -251,6 +260,7 @@ fn decode_pcm_samples(
     8 => decode_pcm_8bit(data)
     16 => decode_pcm_16bit(data)
     24 => decode_pcm_24bit(data)
+    32 => decode_pcm_32bit(data)
     _ => Err(UnsupportedFormat)
   }
 }
@@ -318,6 +328,83 @@ fn decode_pcm_24bit(data : Bytes) -> Result[Array[Int], WavError] {
 
     samples.push(signed_sample)
     i = i + 3
+  }
+
+  Ok(samples)
+}
+
+///|
+/// Decode 32-bit PCM samples (signed, little-endian).
+fn decode_pcm_32bit(data : Bytes) -> Result[Array[Int], WavError] {
+  let samples = []
+  let view = data[:]
+  let mut i = 0
+
+  while i + 3 < view.length() {
+    // Read 32-bit little-endian signed integer
+    let b0 = view[i].to_int()
+    let b1 = view[i + 1].to_int()
+    let b2 = view[i + 2].to_int()
+    let b3 = view[i + 3].to_int()
+    let sample = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
+
+    samples.push(sample)
+    i = i + 4
+  }
+
+  Ok(samples)
+}
+
+///|
+/// Decode IEEE 754 32-bit float samples and convert to 32-bit integer range.
+fn decode_ieee_float(data : Bytes) -> Result[Array[Int], WavError] {
+  let samples = []
+  let view = data[:]
+  let mut i = 0
+
+  while i + 3 < view.length() {
+    // Read 4 bytes as little-endian 32-bit integer
+    let b0 = view[i].to_int()
+    let b1 = view[i + 1].to_int()
+    let b2 = view[i + 2].to_int()
+    let b3 = view[i + 3].to_int()
+    let bits = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
+
+    // Extract IEEE 754 components
+    let sign = if (bits & 0x80000000) != 0 { -1.0 } else { 1.0 }
+    let exponent = (bits >> 23) & 0xFF
+    let mantissa = bits & 0x7FFFFF
+
+    // Convert to double
+    let float_val = if exponent == 0 {
+      // Denormalized or zero
+      sign * Double::from_int(mantissa) * 1.401298464324817e-45
+    } else if exponent == 255 {
+      // Infinity or NaN - clamp to max/min
+      if mantissa == 0 {
+        sign * 1.0e30
+      } else {
+        0.0
+      }
+    } else {
+      // Normalized
+      let exp_val = Double::from_int(exponent - 127)
+      let mantissa_val = 1.0 + Double::from_int(mantissa) / 8388608.0
+      sign * mantissa_val * exp_val.exp2()
+    }
+
+    // Scale to 32-bit integer range [-2^31, 2^31-1]
+    let scaled = float_val * 2147483648.0
+    let clamped = if scaled < -2147483648.0 {
+      -2147483648
+    } else if scaled > 2147483647.0 {
+      2147483647
+    } else {
+      scaled.to_int()
+    }
+
+    samples.push(clamped)
+    i = i + 4
   }
 
   Ok(samples)

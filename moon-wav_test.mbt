@@ -61,6 +61,12 @@ fn create_test_wav(
         buf.write_byte(((clamped >> 8) & 0xFF).to_byte())
         buf.write_byte(((clamped >> 16) & 0xFF).to_byte())
       }
+      32 => {
+        buf.write_byte((sample & 0xFF).to_byte())
+        buf.write_byte(((sample >> 8) & 0xFF).to_byte())
+        buf.write_byte(((sample >> 16) & 0xFF).to_byte())
+        buf.write_byte(((sample >> 24) & 0xFF).to_byte())
+      }
       _ => ()
     }
     i = i + 1
@@ -186,4 +192,93 @@ test "non-PCM format returns error" {
 
   let result = decode(buf.to_bytes())
   assert_true(result is Err(UnsupportedFormat))
+}
+
+///|
+test "decode 32-bit mono WAV" {
+  let samples = [100000, -100000, 200000, -200000]
+  let wav_data = create_test_wav(1, 44100, 32, samples)
+
+  let result = decode(wav_data)
+  assert_true(result is Ok(_))
+
+  match result {
+    Ok(audio) => {
+      assert_eq(audio.info.num_channels, 1)
+      assert_eq(audio.info.sample_rate, 44100)
+      assert_eq(audio.info.bits_per_sample, 32)
+      assert_eq(audio.samples.length(), 4)
+      assert_eq(audio.samples[0], 100000)
+      assert_eq(audio.samples[1], -100000)
+      assert_eq(audio.samples[2], 200000)
+      assert_eq(audio.samples[3], -200000)
+    }
+    Err(_) => assert_true(false)
+  }
+}
+
+///|
+test "decode IEEE float mono WAV" {
+  // Create a WAV with IEEE float format (audio_format=3)
+  let buf = Buffer(size_hint=1024)
+  let num_samples = 4
+  let sample_rate = 44100
+  let bits_per_sample = 32
+
+  // RIFF header
+  buf.write_bytes(b"RIFF")
+  let data_size = num_samples * 4
+  let file_size = 36 + data_size
+  buf.write_int_le(file_size)
+  buf.write_bytes(b"WAVE")
+
+  // fmt chunk
+  buf.write_bytes(b"fmt ")
+  buf.write_int_le(16)
+  buf.write_int16_le(3) // IEEE float format
+  buf.write_int16_le(1) // mono
+  buf.write_int_le(sample_rate)
+  let byte_rate = sample_rate * 1 * 4
+  buf.write_int_le(byte_rate)
+  buf.write_int16_le(4) // block align
+  buf.write_int16_le(bits_per_sample)
+
+  // data chunk
+  buf.write_bytes(b"data")
+  buf.write_int_le(data_size)
+
+  // Write float samples: 0.5, -0.5, 1.0, -1.0
+  // IEEE 754: 0.5 = 0x3F000000, -0.5 = 0xBF000000
+  //           1.0 = 0x3F800000, -1.0 = 0xBF800000
+  let float_samples = [0x3F000000, 0xBF000000, 0x3F800000, 0xBF800000]
+  let mut i = 0
+  while i < 4 {
+    let s = float_samples[i]
+    buf.write_byte((s & 0xFF).to_byte())
+    buf.write_byte(((s >> 8) & 0xFF).to_byte())
+    buf.write_byte(((s >> 16) & 0xFF).to_byte())
+    buf.write_byte(((s >> 24) & 0xFF).to_byte())
+    i = i + 1
+  }
+
+  let result = decode(buf.to_bytes())
+  assert_true(result is Ok(_))
+
+  match result {
+    Ok(audio) => {
+      assert_eq(audio.info.audio_format, 3)
+      assert_eq(audio.info.num_channels, 1)
+      assert_eq(audio.info.sample_rate, 44100)
+      assert_eq(audio.samples.length(), 4)
+      // 0.5 * 2^31 = 1073741824
+      assert_true((audio.samples[0] - 1073741824).abs() < 1000)
+      // -0.5 * 2^31 = -1073741824
+      assert_true((audio.samples[1] + 1073741824).abs() < 1000)
+      // 1.0 * 2^31 = 2147483648, clamped to 2147483647
+      assert_true(audio.samples[2] > 2000000000)
+      // -1.0 * 2^31 = -2147483648
+      assert_true(audio.samples[3] < -2000000000)
+    }
+    Err(_) => assert_true(false)
+  }
 }
